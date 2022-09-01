@@ -16,8 +16,8 @@ public interface BookingService {
 
     Booking findBookingById(Long userId, Long bookingId) throws ObjectNotFoundException, UserHasNoRightsException;
 
-    Collection<Booking> findAllByBookerId(Long userId, BookingState state) throws  BookingUnsupportedTypeException;
+    Collection<Booking> findAllByBookerId(Long userId, BookingState state) throws BookingUnsupportedTypeException;
 
-    Collection<Booking> findAllByOwnerId(Long userId, BookingState state) throws   BookingUnsupportedTypeException;
+    Collection<Booking> findAllByOwnerId(Long userId, BookingState state) throws BookingUnsupportedTypeException;
 }
 

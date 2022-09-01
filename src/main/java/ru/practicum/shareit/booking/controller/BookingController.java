@@ -2,8 +2,8 @@ package ru.practicum.shareit.booking.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.booking.dto.CreatedBookingDto;
 import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.dto.CreatedBookingDto;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingState;
@@ -51,7 +51,7 @@ public class BookingController {
     @GetMapping
     public Collection<BookingDto> findAllByBookerId(@RequestHeader(HEADER_USER_ID) Long userId,
                                                     @RequestParam(defaultValue = "ALL") BookingState state)
-            throws  BookingUnsupportedTypeException {
+            throws BookingUnsupportedTypeException {
         return bookingService.findAllByBookerId(userId, state)
                 .stream()
                 .map(bookingMapper::toBookingDto)
@@ -61,7 +61,7 @@ public class BookingController {
     @GetMapping("/owner")
     public Collection<BookingDto> findAllByOwnerId(@RequestHeader(HEADER_USER_ID) Long userId,
                                                    @RequestParam(defaultValue = "ALL") BookingState state)
-            throws   BookingUnsupportedTypeException {
+            throws BookingUnsupportedTypeException {
         return bookingService.findAllByOwnerId(userId, state)
                 .stream()
                 .map(bookingMapper::toBookingDto)

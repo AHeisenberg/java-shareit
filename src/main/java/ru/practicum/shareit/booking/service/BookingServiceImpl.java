@@ -18,7 +18,6 @@ import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.Collections;
 
 @Slf4j
 @Service

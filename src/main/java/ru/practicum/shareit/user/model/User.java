@@ -1,11 +1,9 @@
 package ru.practicum.shareit.user.model;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-//import org.hibernate.annotations.Entity;
-//import org.hibernate.annotations.Table;
+
 import javax.persistence.*;
 
 @Entity
