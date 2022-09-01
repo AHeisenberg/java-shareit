@@ -35,7 +35,7 @@ public class ItemServiceImpl implements ItemService {
 
 
     @Override
-    public Item createItem(Long userId, Item item) throws ValidationException {
+    public Item createItem(long userId, Item item) throws ValidationException {
         User user = userService.findUserById(userId);
 
         if (!StringUtils.hasText(item.getName())) {
@@ -58,7 +58,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Item findItemById(Long userId, Long itemId) throws ObjectNotFoundException {
+    public Item findItemById(long userId, long itemId) throws ObjectNotFoundException {
         userService.checkUserId(userId);
 
         Item item = itemRepository.findById(itemId).orElseThrow(() -> new ObjectNotFoundException(
@@ -74,7 +74,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Collection<Item> findAllByUserId(Long userId) throws ObjectNotFoundException {
+    public Collection<Item> findAllByUserId(long userId) throws ObjectNotFoundException {
         userService.checkUserId(userId);
 
         return itemRepository.findAllByOwnerId(userId)
@@ -84,7 +84,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Item updateItem(Long userId, Long itemId, Item item) throws ObjectNotFoundException {
+    public Item updateItem(long userId, long itemId, Item item) throws ObjectNotFoundException {
         userService.checkUserId(userId);
         Item itemUpdated = findItemById(userId, itemId);
 
@@ -101,7 +101,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public void deleteItem(Long userId, Long itemId) throws ObjectNotFoundException {
+    public void deleteItem(long userId, long itemId) throws ObjectNotFoundException {
         userService.checkUserId(userId);
         checkItemExistsById(itemId);
 
@@ -120,7 +120,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Comment addComment(Long userId, Long itemId, Comment comment)
+    public Comment addComment(long userId, long itemId, Comment comment)
             throws ValidationException {
         User user = userService.findUserById(userId);
         Item item = findItemById(userId, itemId);
@@ -141,7 +141,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public void checkItemExistsById(Long itemId) throws ObjectNotFoundException {
+    public void checkItemExistsById(long itemId) throws ObjectNotFoundException {
         if (!itemRepository.existsById(itemId)) {
             throw new ObjectNotFoundException(
                     String.format("Item with id %d does not exist", itemId),

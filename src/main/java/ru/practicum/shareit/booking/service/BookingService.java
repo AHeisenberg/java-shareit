@@ -10,14 +10,14 @@ import ru.practicum.shareit.exc.ValidationException;
 import java.util.Collection;
 
 public interface BookingService {
-    Booking createBooking(Long userId, Booking booking) throws ValidationException;
+    Booking createBooking(long userId, Booking booking) throws ValidationException;
 
-    Booking setApproved(Long userId, Long bookingId, boolean approved) throws ValidationException;
+    Booking setApproved(long userId, long bookingId, boolean approved) throws ValidationException;
 
-    Booking findBookingById(Long userId, Long bookingId) throws ObjectNotFoundException, UserHasNoRightsException;
+    Booking findBookingById(long userId, long bookingId) throws ObjectNotFoundException, UserHasNoRightsException;
 
-    Collection<Booking> findAllByBookerId(Long userId, BookingState state) throws BookingUnsupportedTypeException;
+    Collection<Booking> findAllByBookerId(long userId, BookingState state) throws BookingUnsupportedTypeException;
 
-    Collection<Booking> findAllByOwnerId(Long userId, BookingState state) throws BookingUnsupportedTypeException;
+    Collection<Booking> findAllByOwnerId(long userId, BookingState state) throws BookingUnsupportedTypeException;
 }
 

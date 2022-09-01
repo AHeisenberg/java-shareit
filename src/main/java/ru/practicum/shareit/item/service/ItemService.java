@@ -8,20 +8,20 @@ import ru.practicum.shareit.item.model.Item;
 import java.util.Collection;
 
 public interface ItemService {
-    Item createItem(Long userId, Item item) throws ValidationException;
+    Item createItem(long userId, Item item) throws ValidationException;
 
-    Item findItemById(Long userId, Long itemId) throws ObjectNotFoundException;
+    Item findItemById(long userId, long itemId) throws ObjectNotFoundException;
 
-    Collection<Item> findAllByUserId(Long userId) throws ObjectNotFoundException;
+    Collection<Item> findAllByUserId(long userId) throws ObjectNotFoundException;
 
-    Item updateItem(Long userId, Long itemId, Item item) throws ObjectNotFoundException;
+    Item updateItem(long userId, long itemId, Item item) throws ObjectNotFoundException;
 
-    void deleteItem(Long userId, Long itemId) throws ObjectNotFoundException;
+    void deleteItem(long userId, long itemId) throws ObjectNotFoundException;
 
     Collection<Item> searchItemByText(String text);
 
-    Comment addComment(Long userId, Long itemId, Comment comment)
+    Comment addComment(long userId, long itemId, Comment comment)
             throws ValidationException;
 
-    void checkItemExistsById(Long itemId) throws ObjectNotFoundException;
+    void checkItemExistsById(long itemId) throws ObjectNotFoundException;
 }

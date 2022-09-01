@@ -29,7 +29,7 @@ public class BookingServiceImpl implements BookingService {
 
 
     @Override
-    public Booking createBooking(Long userId, Booking booking) throws ValidationException {
+    public Booking createBooking(long userId, Booking booking) throws ValidationException {
         userService.checkUserId(userId);
 
         Item item = itemService.findItemById(userId, booking.getItem().getId());
@@ -55,7 +55,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Booking setApproved(Long userId, Long bookingId, boolean approved) throws ValidationException {
+    public Booking setApproved(long userId, long bookingId, boolean approved) throws ValidationException {
         Booking booking = findBookingById(userId, bookingId);
 
         if (booking.getStatus() != BookingStatus.WAITING) {
@@ -77,7 +77,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Booking findBookingById(Long userId, Long bookingId)
+    public Booking findBookingById(long userId, long bookingId)
             throws ObjectNotFoundException, UserHasNoRightsException {
         userService.checkUserId(userId);
 
@@ -97,7 +97,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Collection<Booking> findAllByBookerId(Long userId, BookingState state)
+    public Collection<Booking> findAllByBookerId(long userId, BookingState state)
             throws BookingUnsupportedTypeException {
         userService.checkUserId(userId);
 
@@ -135,7 +135,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Collection<Booking> findAllByOwnerId(Long userId, BookingState state)
+    public Collection<Booking> findAllByOwnerId(long userId, BookingState state)
             throws BookingUnsupportedTypeException {
         userService.checkUserId(userId);
 

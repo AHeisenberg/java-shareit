@@ -27,7 +27,7 @@ public class BookingController {
     private final BookingMapper bookingMapper;
 
     @PostMapping
-    public CreatedBookingDto createItem(@RequestHeader(HEADER_USER_ID) Long userId,
+    public CreatedBookingDto createItem(@RequestHeader(HEADER_USER_ID) long userId,
                                         @Valid @RequestBody CreatedBookingDto bookingDto)
             throws ValidationException {
         Booking booking = bookingService.createBooking(userId, bookingMapper.toBooking(bookingDto));
@@ -36,20 +36,20 @@ public class BookingController {
     }
 
     @PatchMapping("/{bookingId}")
-    public BookingDto setApproved(@RequestHeader(HEADER_USER_ID) Long userId,
-                                  @PathVariable Long bookingId, @RequestParam boolean approved)
+    public BookingDto setApproved(@RequestHeader(HEADER_USER_ID) long userId,
+                                  @PathVariable long bookingId, @RequestParam boolean approved)
             throws ValidationException {
         return bookingMapper.toBookingDto((bookingService.setApproved(userId, bookingId, approved)));
     }
 
     @GetMapping("/{bookingId}")
-    public BookingDto findItemById(@RequestHeader(HEADER_USER_ID) Long userId, @PathVariable Long bookingId)
+    public BookingDto findItemById(@RequestHeader(HEADER_USER_ID) long userId, @PathVariable long bookingId)
             throws ObjectNotFoundException, UserHasNoRightsException {
         return bookingMapper.toBookingDto(bookingService.findBookingById(userId, bookingId));
     }
 
     @GetMapping
-    public Collection<BookingDto> findAllByBookerId(@RequestHeader(HEADER_USER_ID) Long userId,
+    public Collection<BookingDto> findAllByBookerId(@RequestHeader(HEADER_USER_ID) long userId,
                                                     @RequestParam(defaultValue = "ALL") BookingState state)
             throws BookingUnsupportedTypeException {
         return bookingService.findAllByBookerId(userId, state)
@@ -59,7 +59,7 @@ public class BookingController {
     }
 
     @GetMapping("/owner")
-    public Collection<BookingDto> findAllByOwnerId(@RequestHeader(HEADER_USER_ID) Long userId,
+    public Collection<BookingDto> findAllByOwnerId(@RequestHeader(HEADER_USER_ID) long userId,
                                                    @RequestParam(defaultValue = "ALL") BookingState state)
             throws BookingUnsupportedTypeException {
         return bookingService.findAllByOwnerId(userId, state)

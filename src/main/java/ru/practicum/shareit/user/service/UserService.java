@@ -8,13 +8,13 @@ import java.util.Collection;
 public interface UserService {
     User createUser(User user);
 
-    User findUserById(Long userId) throws ObjectNotFoundException;
+    User findUserById(long userId) throws ObjectNotFoundException;
 
     Collection<User> findAllUsers();
 
-    User updateUser(Long userId, User user) throws ObjectNotFoundException;
+    User updateUser(long userId, User user) throws ObjectNotFoundException;
 
-    void deleteUser(Long userId) throws ObjectNotFoundException;
+    void deleteUser(long userId) throws ObjectNotFoundException;
 
-    void checkUserId(Long userId) throws ObjectNotFoundException;
+    void checkUserId(long userId) throws ObjectNotFoundException;
 }

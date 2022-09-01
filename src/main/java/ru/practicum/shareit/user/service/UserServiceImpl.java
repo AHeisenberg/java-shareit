@@ -25,7 +25,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User findUserById(Long userId) throws ObjectNotFoundException {
+    public User findUserById(long userId) throws ObjectNotFoundException {
         return userRepository.findById(userId).orElseThrow(() -> new ObjectNotFoundException(
                 String.format("User with id %d does not exist", userId),
                 "GetUserById")
@@ -38,7 +38,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User updateUser(Long userId, User user) throws ObjectNotFoundException {
+    public User updateUser(long userId, User user) throws ObjectNotFoundException {
         User userUpdated = findUserById(userId);
 
         Optional.ofNullable(user.getEmail()).ifPresent(userUpdated::setEmail);
@@ -49,7 +49,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void deleteUser(Long userId) throws ObjectNotFoundException {
+    public void deleteUser(long userId) throws ObjectNotFoundException {
         checkUserId(userId);
 
         userRepository.deleteById(userId);
@@ -58,7 +58,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void checkUserId(Long userId) throws ObjectNotFoundException {
+    public void checkUserId(long userId) throws ObjectNotFoundException {
         if (!userRepository.existsById(userId)) {
             throw new ObjectNotFoundException(
                     String.format("User with id %d does not exist", userId),
