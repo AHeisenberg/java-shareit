@@ -33,7 +33,6 @@ public class ItemServiceImpl implements ItemService {
 
     private final CommentRepository commentRepository;
 
-
     @Override
     public Item createItem(long userId, Item item) throws ValidationException {
         User user = userService.findUserById(userId);
@@ -62,9 +61,7 @@ public class ItemServiceImpl implements ItemService {
         userService.checkUserId(userId);
 
         Item item = itemRepository.findById(itemId).orElseThrow(() -> new ObjectNotFoundException(
-                String.format("Item with id %d does not exist", itemId),
-                "getItemById"
-        ));
+                String.format("Item with id %d does not exist", itemId), "getItemById"));
 
         if (item.getOwner().getId() == userId) {
             setBookings(item);
@@ -74,8 +71,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Collection<Item> findAllByUserId(long userId) throws ObjectNotFoundException {
-        userService.checkUserId(userId);
+    public Collection<Item> findAllByUserId(long userId) {
 
         return itemRepository.findAllByOwnerId(userId)
                 .stream()
@@ -129,8 +125,7 @@ public class ItemServiceImpl implements ItemService {
                         LocalDateTime.now())
                 .orElseThrow(() -> new ValidationException(
                         String.format("The user with id %d did not take the item with id %d on lease", userId, itemId),
-                        "GetBookingById"
-                ));
+                        "GetBookingById"));
 
         comment.setAuthor(user);
         comment.setItem(item);
@@ -145,14 +140,13 @@ public class ItemServiceImpl implements ItemService {
         if (!itemRepository.existsById(itemId)) {
             throw new ObjectNotFoundException(
                     String.format("Item with id %d does not exist", itemId),
-                    "CheckItemExistsById"
-            );
+                    "CheckItemExistsById");
         }
     }
 
     private Item setBookings(Item item) {
-        Optional<Booking> last = getLastBookingForItem(item.getOwner().getId());
-        Optional<Booking> next = getNextBookingForItem(item.getOwner().getId());
+        Optional<Booking> last = getLastBookingForItem(item.getId());
+        Optional<Booking> next = getNextBookingForItem(item.getId());
 
         item.setLastBooking(last.orElse(null));
         item.setNextBooking(next.orElse(null));
@@ -160,13 +154,13 @@ public class ItemServiceImpl implements ItemService {
         return item;
     }
 
-    private Optional<Booking> getLastBookingForItem(long userId) {
-        return bookingRepository.findFirstByItemOwnerIdAndStatusOrderByEnd(userId,
+    private Optional<Booking> getLastBookingForItem(long itemId) {
+        return bookingRepository.findFirstByItemIdAndStatusOrderByEnd(itemId,
                 BookingStatus.APPROVED);
     }
 
-    private Optional<Booking> getNextBookingForItem(long userId) {
-        return bookingRepository.findFirstByItemOwnerIdAndStatusOrderByEndDesc(userId,
+    private Optional<Booking> getNextBookingForItem(long itemId) {
+        return bookingRepository.findFirstByItemIdAndStatusOrderByEndDesc(itemId,
                 BookingStatus.APPROVED);
     }
 }

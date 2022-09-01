@@ -8,7 +8,6 @@ import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.booking.service.BookingService;
-import ru.practicum.shareit.exc.BookingUnsupportedTypeException;
 import ru.practicum.shareit.exc.ObjectNotFoundException;
 import ru.practicum.shareit.exc.UserHasNoRightsException;
 import ru.practicum.shareit.exc.ValidationException;
@@ -31,7 +30,6 @@ public class BookingController {
                                         @Valid @RequestBody CreatedBookingDto bookingDto)
             throws ValidationException {
         Booking booking = bookingService.createBooking(userId, bookingMapper.toBooking(bookingDto));
-
         return bookingMapper.toCreatedBookingDto(booking);
     }
 
@@ -51,7 +49,7 @@ public class BookingController {
     @GetMapping
     public Collection<BookingDto> findAllByBookerId(@RequestHeader(HEADER_USER_ID) long userId,
                                                     @RequestParam(defaultValue = "ALL") BookingState state)
-            throws BookingUnsupportedTypeException {
+            throws ObjectNotFoundException {
         return bookingService.findAllByBookerId(userId, state)
                 .stream()
                 .map(bookingMapper::toBookingDto)
@@ -61,7 +59,7 @@ public class BookingController {
     @GetMapping("/owner")
     public Collection<BookingDto> findAllByOwnerId(@RequestHeader(HEADER_USER_ID) long userId,
                                                    @RequestParam(defaultValue = "ALL") BookingState state)
-            throws BookingUnsupportedTypeException {
+            throws ObjectNotFoundException {
         return bookingService.findAllByOwnerId(userId, state)
                 .stream()
                 .map(bookingMapper::toBookingDto)

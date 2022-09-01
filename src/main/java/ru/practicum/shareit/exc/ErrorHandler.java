@@ -1,46 +1,44 @@
 package ru.practicum.shareit.exc;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import java.util.Map;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @RestControllerAdvice
 public class ErrorHandler {
 
-    @ExceptionHandler({ValidationException.class, MethodArgumentNotValidException.class})
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, String> handleValidationException(final Exception e) {
-        return Map.of("Unknown error", e.getMessage());
+    public ErrorResponse handleValidationException(final ValidationException e) {
+        return new ErrorResponse(e.getMessage());
     }
 
-    @ExceptionHandler(EmailAlreadyExistsException.class)
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Map<String, String> handleEmailAlreadyExistsException(final Exception e) {
-        return Map.of("Unknown error", e.getMessage());
+    public ErrorResponse handleEmailAlreadyExistsException(final EmailAlreadyExistsException e) {
+        return new ErrorResponse(e.getMessage());
     }
 
-    @ExceptionHandler({ObjectNotFoundException.class, UserHasNoRightsException.class})
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public Map<String, String> handleObjectNotFoundException(final Exception e) {
-        return Map.of("Unknown error", e.getMessage());
+    public ErrorResponse handleUserHasNoRightsException(final UserHasNoRightsException e) {
+        return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Map<String, String> handleThrowable(final Throwable e) {
-        return Map.of("Unknown error", "Unknown error");
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleObjectNotFoundException(final ObjectNotFoundException e) {
+        return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler
-    public ResponseEntity<Map<String, String>> handleAccess(final BookingUnsupportedTypeException e) {
-        return new ResponseEntity<>(
-                Map.of("error", e.getMessage()),
-                HttpStatus.BAD_REQUEST
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleMethodArgumentTypeMismatchException(final MethodArgumentTypeMismatchException e) {
+        return new ErrorResponse(
+                String.format("Unknown %s: %s", e.getName(), e.getValue())
         );
     }
+
 }

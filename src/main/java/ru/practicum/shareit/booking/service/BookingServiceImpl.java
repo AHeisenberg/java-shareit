@@ -7,7 +7,6 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
-import ru.practicum.shareit.exc.BookingUnsupportedTypeException;
 import ru.practicum.shareit.exc.ObjectNotFoundException;
 import ru.practicum.shareit.exc.UserHasNoRightsException;
 import ru.practicum.shareit.exc.ValidationException;
@@ -27,7 +26,6 @@ public class BookingServiceImpl implements BookingService {
     private final ItemService itemService;
     private final BookingRepository bookingRepository;
 
-
     @Override
     public Booking createBooking(long userId, Booking booking) throws ValidationException {
         userService.checkUserId(userId);
@@ -41,8 +39,7 @@ public class BookingServiceImpl implements BookingService {
         if (item.getOwner().getId().equals(userId)) {
             throw new UserHasNoRightsException(errorMessageData, "CreateBooking");
         }
-        if (booking.getStart().isBefore(LocalDateTime.now()) || booking.getEnd().isBefore(LocalDateTime.now())
-                || booking.getEnd().isBefore(booking.getStart())) {
+        if (booking.getStart().isBefore(LocalDateTime.now()) || booking.getEnd().isBefore(LocalDateTime.now()) || booking.getEnd().isBefore(booking.getStart())) {
             throw new ValidationException(errorMessageData, "CreateBooking");
         }
 
@@ -59,127 +56,86 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = findBookingById(userId, bookingId);
 
         if (booking.getStatus() != BookingStatus.WAITING) {
-            throw new ValidationException(
-                    String.format("Reservation with id %d is not pending confirmation", bookingId),
-                    "SetStatus"
-            );
+            throw new ValidationException(String.format("Reservation with id %d is not pending confirmation", bookingId), "SetStatus");
         }
 
         if (booking.getItem().getOwner().getId() != userId) {
-            throw new UserHasNoRightsException(
-                    String.format("User with id %d has no right to change status", userId),
-                    "SetApproved"
-            );
+            throw new UserHasNoRightsException(String.format("User with id %d has no right to change status", userId), "SetApproved");
         }
         booking.setStatus(approved ? BookingStatus.APPROVED : BookingStatus.REJECTED);
-
         return bookingRepository.save(booking);
     }
 
     @Override
-    public Booking findBookingById(long userId, long bookingId)
-            throws ObjectNotFoundException, UserHasNoRightsException {
+    public Booking findBookingById(long userId, long bookingId) throws ObjectNotFoundException, UserHasNoRightsException {
         userService.checkUserId(userId);
 
-        Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new ObjectNotFoundException(
-                String.format("Booking with id %d does not exist", bookingId),
-                "findBookingById"
-        ));
+        Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new ObjectNotFoundException(String.format("Booking with id %d does not exist", bookingId), "findBookingById"));
 
         if (booking.getBooker().getId() != userId && booking.getItem().getOwner().getId() != userId) {
-            throw new UserHasNoRightsException(
-                    String.format("User with id %d has no right", userId),
-                    "GetBookingById"
-            );
+            throw new UserHasNoRightsException(String.format("User with id %d has no right", userId), "GetBookingById");
         }
 
         return booking;
     }
 
     @Override
-    public Collection<Booking> findAllByBookerId(long userId, BookingState state)
-            throws BookingUnsupportedTypeException {
+    public Collection<Booking> findAllByBookerId(long userId, BookingState state) throws ObjectNotFoundException {
         userService.checkUserId(userId);
 
-        Collection<Booking> result;
+        Collection<Booking> result = null;
 
         switch (state) {
             case ALL:
                 result = bookingRepository.findAllByBookerIdOrderByStartDesc(userId);
                 break;
             case CURRENT:
-                result = bookingRepository.findAllByBookerIdAndEndIsBeforeAndStartIsAfterOrderByStartDesc(userId,
-                        LocalDateTime.now(), LocalDateTime.now());
+                result = bookingRepository.findAllByBookerIdAndEndIsAfterAndStartIsBefore(userId, LocalDateTime.now(), LocalDateTime.now());
                 break;
             case PAST:
-                result = bookingRepository.findAllByBookerIdAndEndIsBeforeOrderByStartDesc(userId,
-                        LocalDateTime.now());
+                result = bookingRepository.findAllByBookerIdAndEndIsBefore(userId, LocalDateTime.now());
                 break;
             case FUTURE:
-                result = bookingRepository.findAllByBookerIdAndStartIsAfterOrderByStartDesc(userId,
-                        LocalDateTime.now());
+                result = bookingRepository.findAllByBookerIdAndStartIsAfterOrderByStartDesc(userId, LocalDateTime.now());
                 break;
             case WAITING:
-                result = bookingRepository.findAllByBookerIdAndStatusOrderByStartDesc(userId, BookingStatus.WAITING);
+                result = bookingRepository.findAllByBookerIdAndStatus(userId, BookingStatus.WAITING);
                 break;
             case REJECTED:
-                result = bookingRepository.findAllByBookerIdAndStatusOrderByStartDesc(userId, BookingStatus.REJECTED);
+                result = bookingRepository.findAllByBookerIdAndStatus(userId, BookingStatus.REJECTED);
                 break;
-            default:
-//                result = Collections.emptyList();
-                throw new BookingUnsupportedTypeException("Unknown state: UNSUPPORTED_STATUS");
-
         }
-
         return result;
     }
 
+
     @Override
-    public Collection<Booking> findAllByOwnerId(long userId, BookingState state)
-            throws BookingUnsupportedTypeException {
+    public Collection<Booking> findAllByOwnerId(long userId, BookingState state) throws ObjectNotFoundException {
         userService.checkUserId(userId);
 
-        Collection<Booking> result;
-
-//        BookingState states;
-//
-//        try {
-//            states = state;
-//        } catch (IllegalArgumentException e) {
-//            throw new BookingUnsupportedTypeException("Unknown state: UNSUPPORTED_STATUS");
-//        }
-
+        Collection<Booking> result = null;
 
         switch (state) {
             case ALL:
                 result = bookingRepository.findAllByItemOwnerIdOrderByStartDesc(userId);
                 break;
+
             case CURRENT:
-                result = bookingRepository.findAllByItemOwnerIdAndEndIsBeforeAndStartIsAfterOrderByStartDesc(userId,
-                        LocalDateTime.now(), LocalDateTime.now());
+                result = bookingRepository.findAllByItemOwnerIdAndEndIsAfterAndStartIsBefore(userId, LocalDateTime.now(), LocalDateTime.now());
                 break;
             case PAST:
-                result = bookingRepository.findAllByItemOwnerIdAndEndIsBeforeOrderByStartDesc(userId,
-                        LocalDateTime.now());
+                result = bookingRepository.findAllByItemOwnerIdAndEndIsBefore(userId, LocalDateTime.now());
                 break;
             case FUTURE:
-                result = bookingRepository.findAllByItemOwnerIdAndStartIsAfterOrderByStartDesc(userId,
-                        LocalDateTime.now());
+                result = bookingRepository.findAllByItemOwnerIdAndStartIsAfterOrderByStartDesc(userId, LocalDateTime.now());
                 break;
             case WAITING:
-                result = bookingRepository.findAllByItemOwnerIdAndStatusOrderByStartDesc(userId, BookingStatus.WAITING);
+                result = bookingRepository.findAllByItemOwnerIdAndStatus(userId, BookingStatus.WAITING);
                 break;
             case REJECTED:
-                result = bookingRepository.findAllByItemOwnerIdAndStatusOrderByStartDesc(userId, BookingStatus.REJECTED);
+                result = bookingRepository.findAllByItemOwnerIdAndStatus(userId, BookingStatus.REJECTED);
                 break;
-
-            default:
-//                result = Collections.emptyList();
-//                throw new UserHasNoRightsException("Unknown state: UNSUPPORTED_STATUS", "findAllByOwnerId");
-                throw new BookingUnsupportedTypeException("Unknown state: UNSUPPORTED_STATUS");
-
         }
-
         return result;
     }
 }

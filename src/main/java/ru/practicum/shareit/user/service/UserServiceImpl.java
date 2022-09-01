@@ -27,9 +27,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User findUserById(long userId) throws ObjectNotFoundException {
         return userRepository.findById(userId).orElseThrow(() -> new ObjectNotFoundException(
-                String.format("User with id %d does not exist", userId),
-                "GetUserById")
-        );
+                String.format("User with id %d does not exist", userId), "GetUserById"));
     }
 
     @Override
@@ -60,10 +58,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void checkUserId(long userId) throws ObjectNotFoundException {
         if (!userRepository.existsById(userId)) {
-            throw new ObjectNotFoundException(
-                    String.format("User with id %d does not exist", userId),
-                    "CheckUserExistsById"
-            );
+            throw new ObjectNotFoundException(String.format("User with id %d does not exist", userId), "CheckUserExistsById");
         }
     }
 }
