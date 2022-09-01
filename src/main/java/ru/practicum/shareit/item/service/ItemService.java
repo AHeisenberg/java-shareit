@@ -3,19 +3,26 @@ package ru.practicum.shareit.item.service;
 import ru.practicum.shareit.exc.ObjectNotFoundException;
 import ru.practicum.shareit.exc.ValidationException;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.model.Comment;
+import ru.practicum.shareit.item.model.Item;
 
 import java.util.Collection;
 
 public interface ItemService {
-    ItemDto createItem(Long userId, ItemDto itemDto) throws ValidationException;
+    Item createItem(Long userId, Item item) throws ValidationException;
 
-    ItemDto findItemById(Long itemId) throws ObjectNotFoundException;
+    Item findItemById(Long userId, Long itemId) throws ObjectNotFoundException;
 
-    Collection<ItemDto> findAllItemsByUserId(Long userId) throws ObjectNotFoundException;
+    Collection<Item> findAllByUserId(Long userId) throws ObjectNotFoundException;
 
-    ItemDto updateItem(Long userId, Long itemId, ItemDto itemDto) throws ObjectNotFoundException;
+    Item updateItem(Long userId, Long itemId, Item item) throws ObjectNotFoundException;
 
-    Long deleteItem(Long userId, Long itemId) throws ObjectNotFoundException;
+    void deleteItem(Long userId, Long itemId) throws ObjectNotFoundException;
 
-    Collection<ItemDto> searchItemByText(String text);
+    Collection<Item> searchItemByText(String text);
+
+    Comment addComment(Long userId, Long itemId, Comment comment)
+            throws ValidationException;
+
+    void checkItemExistsById(Long itemId) throws ObjectNotFoundException;
 }

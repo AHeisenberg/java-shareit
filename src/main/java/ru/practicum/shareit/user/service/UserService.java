@@ -3,22 +3,20 @@ package ru.practicum.shareit.user.service;
 import ru.practicum.shareit.exc.ObjectNotFoundException;
 import ru.practicum.shareit.exc.ValidationException;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.model.User;
 
 import java.util.Collection;
 
 public interface UserService {
-    UserDto createUser(UserDto userDto) throws ValidationException;
+    User createUser(User user);
 
+    User findUserById(Long userId) throws ObjectNotFoundException;
 
-    UserDto findUserById(Long userId) throws ObjectNotFoundException;
+    Collection<User> findAllUsers();
 
-    Collection<UserDto> findAllUsers();
+    User updateUser(Long userId, User user) throws ObjectNotFoundException;
 
-    UserDto updateUser(Long userId, UserDto userDto)
-            throws ValidationException;
-
-    Long deleteUser(Long userId) throws ObjectNotFoundException;
-
+    void deleteUser(Long userId) throws ObjectNotFoundException;
 
     void checkUserId(Long userId) throws ObjectNotFoundException;
 }

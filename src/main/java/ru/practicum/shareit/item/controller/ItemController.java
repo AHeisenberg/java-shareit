@@ -4,11 +4,17 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.exc.ObjectNotFoundException;
 import ru.practicum.shareit.exc.ValidationException;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.mapper.CommentMapper;
+import ru.practicum.shareit.item.mapper.ItemMapper;
+import ru.practicum.shareit.item.model.Comment;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
 import java.util.Collection;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/items")
@@ -16,37 +22,60 @@ import java.util.Collection;
 public class ItemController {
     private static final String HEADER_USER_ID = "X-Sharer-User-Id";
     private final ItemService itemService;
+    private final ItemMapper itemMapper;
+    private final CommentMapper commentMapper;
 
     @PostMapping
-    public ItemDto createItem(@RequestHeader(HEADER_USER_ID) String userId, @Valid @RequestBody ItemDto itemDto)
-            throws  ValidationException {
-        return itemService.createItem(Long.valueOf(userId), itemDto);
+    public ItemDto addItem(@RequestHeader(HEADER_USER_ID) long userId, @Valid @RequestBody ItemDto itemDto)
+            throws ValidationException {
+        Item item = itemService.createItem(userId, itemMapper.toItem(itemDto));
+
+        return itemMapper.toItemDto(item);
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto findItemById(@PathVariable String  itemId) throws ObjectNotFoundException {
-        return itemService.findItemById(Long.valueOf(itemId));
+    public ItemDto findItemById(@RequestHeader(HEADER_USER_ID) long userId, @PathVariable long itemId)
+            throws ObjectNotFoundException {
+        return itemMapper.toItemDto((itemService.findItemById(userId, itemId)));
     }
 
     @GetMapping
-    public Collection<ItemDto> findAll(@RequestHeader(HEADER_USER_ID) String userId) throws ObjectNotFoundException {
-        return itemService.findAllItemsByUserId(Long.valueOf(userId));
+    public Collection<ItemDto> findAllByUserId(@RequestHeader(HEADER_USER_ID) long userId)
+            throws ObjectNotFoundException {
+        return itemService.findAllByUserId(userId)
+                .stream()
+                .map(itemMapper::toItemDto)
+                .collect(Collectors.toList());
     }
 
     @PatchMapping("/{itemId}")
-    public ItemDto updateItem(@RequestHeader(HEADER_USER_ID) String userId, @PathVariable String itemId,
-                              @Valid @RequestBody ItemDto itemDto) throws ObjectNotFoundException {
-        return itemService.updateItem(Long.valueOf(userId), Long.valueOf(itemId), itemDto);
+    public ItemDto updateItem(@RequestHeader(HEADER_USER_ID) long userId, @PathVariable long itemId,
+                              @RequestBody ItemDto itemDto) throws ObjectNotFoundException {
+        Item item = itemService.updateItem(userId, itemId, itemMapper.toItem(itemDto));
+
+        return itemMapper.toItemDto(item);
     }
 
     @DeleteMapping("/{itemId}")
-    public Long deleteItem(@RequestHeader(HEADER_USER_ID) String userId, @PathVariable String itemId)
+    public void deleteItem(@RequestHeader(HEADER_USER_ID) long userId, @PathVariable long itemId)
             throws ObjectNotFoundException {
-        return itemService.deleteItem(Long.valueOf(userId), Long.valueOf(itemId));
+        itemService.deleteItem(userId, itemId);
     }
 
     @GetMapping("/search")
     public Collection<ItemDto> searchItemByText(@RequestParam String text) {
-        return itemService.searchItemByText(text);
+        return itemService.searchItemByText(text)
+                .stream()
+                .map(itemMapper::toItemDto)
+                .collect(Collectors.toList());
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public CommentDto addComment(@RequestHeader(HEADER_USER_ID) long userId, @PathVariable long itemId,
+                                 @Valid @RequestBody CommentDto commentDto)
+            throws ValidationException {
+        Comment comment = itemService.addComment(userId, itemId, commentMapper.toComment(commentDto));
+
+        return commentMapper.toCommentDto(comment);
     }
 }

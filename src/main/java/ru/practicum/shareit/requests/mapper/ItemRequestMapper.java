@@ -8,36 +8,36 @@ import ru.practicum.shareit.user.model.User;
 @Component
 public class ItemRequestMapper {
     public ItemRequestDto toItemDto(ItemRequest item) {
-        return ItemRequestDto.builder()
-                .id(item.getId())
-                .description(item.getDescription())
-                .requestor(toUserItemRequest(item.getRequestor()))
-                .created(item.getCreated())
-                .build();
+        return new ItemRequestDto(
+                item.getId(),
+                item.getDescription(),
+                toUserItemRequest(item.getRequestor()),
+                item.getCreated()
+        );
     }
 
     public ItemRequest toItem(ItemRequestDto itemDto) {
-        return ItemRequest.builder()
-                .id(itemDto.getId())
-                .description(itemDto.getDescription())
-                .requestor(toUser(itemDto.getRequestor()))
-                .created(itemDto.getCreated())
-                .build();
+        return new ItemRequest(
+                itemDto.getId(),
+                itemDto.getDescription(),
+                toUser(itemDto.getRequestor()),
+                itemDto.getCreated()
+        );
     }
 
     private ItemRequestDto.User toUserItemRequest(User user) {
-        return ItemRequestDto.User.builder()
-                .id(user.getId())
-                .name(user.getName())
-                .email(user.getEmail())
-                .build();
+        return new ItemRequestDto.User(
+                user.getId(),
+                user.getName(),
+                user.getEmail()
+        );
     }
 
     private User toUser(ItemRequestDto.User bookingUser) {
-        return User.builder()
-                .id(bookingUser.getId())
-                .name(bookingUser.getName())
-                .email(bookingUser.getEmail())
-                .build();
+        return new User(
+                bookingUser.getId(),
+                bookingUser.getName(),
+                bookingUser.getEmail()
+        );
     }
 }
