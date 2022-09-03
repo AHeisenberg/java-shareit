@@ -1,6 +1,7 @@
 package ru.practicum.shareit.booking.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
 
@@ -11,21 +12,25 @@ import java.util.Optional;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
+    @Query("select b " +
+            "from Booking b " +
+            "where b.booker.id = :bookerId and current_timestamp > b.start" +
+            " and current_timestamp < b.end")
+    List<Booking> findForBookerCurrent(long bookerId);
+
+    @Query("select b " +
+            "from Booking b " +
+            "where b.booker.id = :id and b.start > current_timestamp " +
+            "order by b.start desc")
+    List<Booking> findAllByBookerAndFutureState(Long id);
+
     Collection<Booking> findAllByBookerIdOrderByStartDesc(long userId);
 
-    Collection<Booking> findAllByBookerIdAndStartIsAfterOrderByStartDesc(long bookerId, LocalDateTime start);
-
     Collection<Booking> findAllByItemOwnerIdOrderByStartDesc(long userId);
-
-    List<Booking> findAllByBookerIdAndEndIsAfterAndStartIsBefore(long bookerId, LocalDateTime end, LocalDateTime start);
 
     List<Booking> findAllByBookerIdAndEndIsBefore(long bookerId, LocalDateTime end);
 
     List<Booking> findAllByBookerIdAndStatus(long bookerId, BookingStatus status);
-
-    Collection<Booking> findAllByItemOwnerIdAndEndIsAfterAndStartIsBefore(long bookerId,
-                                                                          LocalDateTime end,
-                                                                          LocalDateTime start);
 
     Collection<Booking> findAllByItemOwnerIdAndEndIsBefore(long bookerId, LocalDateTime end);
 
@@ -39,4 +44,9 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     Optional<Booking> findFirstByBookerIdAndItemIdAndStatusAndStartBefore(long userId, long itemId,
                                                                           BookingStatus status, LocalDateTime now);
+
+    Collection<Booking> findAllByItemOwnerIdAndEndIsAfterAndStartIsBefore(long bookerId,
+                                                                          LocalDateTime end,
+                                                                          LocalDateTime start);
+
 }

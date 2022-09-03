@@ -58,7 +58,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public void checkUserId(long userId) throws ObjectNotFoundException {
         if (!userRepository.existsById(userId)) {
-            throw new ObjectNotFoundException(String.format("User with id %d does not exist", userId), "CheckUserExistsById");
+            throw new ObjectNotFoundException(String.format(
+                    "User with id %d does not exist", userId), "CheckUserExistsById");
         }
     }
 }

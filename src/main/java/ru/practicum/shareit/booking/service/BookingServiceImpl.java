@@ -39,7 +39,8 @@ public class BookingServiceImpl implements BookingService {
         if (item.getOwner().getId().equals(userId)) {
             throw new UserHasNoRightsException(errorMessageData, "CreateBooking");
         }
-        if (booking.getStart().isBefore(LocalDateTime.now()) || booking.getEnd().isBefore(LocalDateTime.now()) || booking.getEnd().isBefore(booking.getStart())) {
+        if (booking.getStart().isBefore(LocalDateTime.now()) || booking.getEnd().isBefore(LocalDateTime.now())
+                || booking.getEnd().isBefore(booking.getStart())) {
             throw new ValidationException(errorMessageData, "CreateBooking");
         }
 
@@ -56,21 +57,25 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = findBookingById(userId, bookingId);
 
         if (booking.getStatus() != BookingStatus.WAITING) {
-            throw new ValidationException(String.format("Reservation with id %d is not pending confirmation", bookingId), "SetStatus");
+            throw new ValidationException(String.format(
+                    "Reservation with id %d is not pending confirmation", bookingId), "SetStatus");
         }
 
         if (booking.getItem().getOwner().getId() != userId) {
-            throw new UserHasNoRightsException(String.format("User with id %d has no right to change status", userId), "SetApproved");
+            throw new UserHasNoRightsException(String.format(
+                    "User with id %d has no right to change status", userId), "SetApproved");
         }
         booking.setStatus(approved ? BookingStatus.APPROVED : BookingStatus.REJECTED);
         return bookingRepository.save(booking);
     }
 
     @Override
-    public Booking findBookingById(long userId, long bookingId) throws ObjectNotFoundException, UserHasNoRightsException {
+    public Booking findBookingById(long userId, long bookingId)
+            throws ObjectNotFoundException, UserHasNoRightsException {
         userService.checkUserId(userId);
 
-        Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new ObjectNotFoundException(String.format("Booking with id %d does not exist", bookingId), "findBookingById"));
+        Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new ObjectNotFoundException(
+                String.format("Booking with id %d does not exist", bookingId), "findBookingById"));
 
         if (booking.getBooker().getId() != userId && booking.getItem().getOwner().getId() != userId) {
             throw new UserHasNoRightsException(String.format("User with id %d has no right", userId), "GetBookingById");
@@ -90,13 +95,13 @@ public class BookingServiceImpl implements BookingService {
                 result = bookingRepository.findAllByBookerIdOrderByStartDesc(userId);
                 break;
             case CURRENT:
-                result = bookingRepository.findAllByBookerIdAndEndIsAfterAndStartIsBefore(userId, LocalDateTime.now(), LocalDateTime.now());
+                result = bookingRepository.findForBookerCurrent(userId);
                 break;
             case PAST:
                 result = bookingRepository.findAllByBookerIdAndEndIsBefore(userId, LocalDateTime.now());
                 break;
             case FUTURE:
-                result = bookingRepository.findAllByBookerIdAndStartIsAfterOrderByStartDesc(userId, LocalDateTime.now());
+                result = bookingRepository.findAllByBookerAndFutureState(userId);
                 break;
             case WAITING:
                 result = bookingRepository.findAllByBookerIdAndStatus(userId, BookingStatus.WAITING);
@@ -121,13 +126,15 @@ public class BookingServiceImpl implements BookingService {
                 break;
 
             case CURRENT:
-                result = bookingRepository.findAllByItemOwnerIdAndEndIsAfterAndStartIsBefore(userId, LocalDateTime.now(), LocalDateTime.now());
+                result = bookingRepository.findAllByItemOwnerIdAndEndIsAfterAndStartIsBefore(
+                        userId, LocalDateTime.now(), LocalDateTime.now());
                 break;
             case PAST:
                 result = bookingRepository.findAllByItemOwnerIdAndEndIsBefore(userId, LocalDateTime.now());
                 break;
             case FUTURE:
-                result = bookingRepository.findAllByItemOwnerIdAndStartIsAfterOrderByStartDesc(userId, LocalDateTime.now());
+                result = bookingRepository.findAllByItemOwnerIdAndStartIsAfterOrderByStartDesc(
+                        userId, LocalDateTime.now());
                 break;
             case WAITING:
                 result = bookingRepository.findAllByItemOwnerIdAndStatus(userId, BookingStatus.WAITING);
