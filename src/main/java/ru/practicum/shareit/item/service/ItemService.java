@@ -23,5 +23,4 @@ public interface ItemService {
     Comment addComment(long userId, long itemId, Comment comment)
             throws ValidationException;
 
-    void checkItemExistsById(long itemId) throws ObjectNotFoundException;
 }

@@ -135,8 +135,7 @@ public class ItemServiceImpl implements ItemService {
         return commentRepository.save(comment);
     }
 
-    @Override
-    public void checkItemExistsById(long itemId) throws ObjectNotFoundException {
+    private void checkItemExistsById(long itemId) throws ObjectNotFoundException {
         if (!itemRepository.existsById(itemId)) {
             throw new ObjectNotFoundException(
                     String.format("Item with id %d does not exist", itemId),

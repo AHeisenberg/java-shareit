@@ -25,23 +25,23 @@ public class BookingServiceImpl implements BookingService {
     private final UserService userService;
     private final ItemService itemService;
     private final BookingRepository bookingRepository;
+    private static final String ERROR_MESSAGE_DATE = "The start or end date of the booking is incorrect";
 
     @Override
     public Booking createBooking(long userId, Booking booking) throws ValidationException {
         userService.checkUserId(userId);
 
         Item item = itemService.findItemById(userId, booking.getItem().getId());
-        String errorMessageData = "The start or end date of the booking is incorrect";
 
         if (!item.getAvailable()) {
             throw new ValidationException("unavailable item", "CreateBooking");
         }
         if (item.getOwner().getId().equals(userId)) {
-            throw new UserHasNoRightsException(errorMessageData, "CreateBooking");
+            throw new UserHasNoRightsException(ERROR_MESSAGE_DATE, "CreateBooking");
         }
         if (booking.getStart().isBefore(LocalDateTime.now()) || booking.getEnd().isBefore(LocalDateTime.now())
                 || booking.getEnd().isBefore(booking.getStart())) {
-            throw new ValidationException(errorMessageData, "CreateBooking");
+            throw new ValidationException(ERROR_MESSAGE_DATE, "CreateBooking");
         }
 
         booking.setBooker(new User(userId, null, null));
