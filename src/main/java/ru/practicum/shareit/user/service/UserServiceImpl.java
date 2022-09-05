@@ -3,72 +3,63 @@ package ru.practicum.shareit.user.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import ru.practicum.shareit.exc.ObjectNotFoundException;
-import ru.practicum.shareit.exc.ValidationException;
-import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.Collection;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
-    private final UserMapper userMapper;
 
     @Override
-    public UserDto createUser(UserDto userDto) throws ValidationException {
-        userRepository.checkEmail(userDto.getEmail());
-
-        User user = userRepository.createUser(userMapper.toUser(userDto));
+    public User createUser(User user) {
+        user = userRepository.save(user);
 
         log.info("User with id {} is created", user.getId());
-        return userMapper.toUserDto(user);
+        return user;
     }
 
     @Override
-    public UserDto findUserById(Long userId) throws ObjectNotFoundException {
-        checkUserId(userId);
-
-        User user = userRepository.findUserById(userId);
-        return userMapper.toUserDto(user);
-    }
-
-    public Collection<UserDto> findAllUsers() {
-        return userRepository.findAllUsers().values().stream()
-                .map(userMapper::toUserDto)
-                .collect(Collectors.toList());
+    public User findUserById(long userId) throws ObjectNotFoundException {
+        return userRepository.findById(userId).orElseThrow(() -> new ObjectNotFoundException(
+                String.format("User with id %d does not exist", userId), "GetUserById"));
     }
 
     @Override
-    public UserDto updateUser(Long userId, UserDto userDto) throws ValidationException {
+    public Collection<User> findAllUsers() {
+        return userRepository.findAll();
+    }
+
+    @Override
+    public User updateUser(long userId, User user) throws ObjectNotFoundException {
+        User userUpdated = findUserById(userId);
+
+        Optional.ofNullable(user.getEmail()).ifPresent(userUpdated::setEmail);
+        Optional.ofNullable(user.getName()).ifPresent(userUpdated::setName);
+
+        log.info("Updated user data with id {}", userUpdated.getId());
+        return userRepository.save(userUpdated);
+    }
+
+    @Override
+    public void deleteUser(long userId) throws ObjectNotFoundException {
         checkUserId(userId);
 
-        if (StringUtils.hasText(userDto.getEmail())) {
-            userRepository.checkEmail(userDto.getEmail());
+        userRepository.deleteById(userId);
+
+        log.info("Deleted user with id {}", userId);
+    }
+
+    @Override
+    public void checkUserId(long userId) throws ObjectNotFoundException {
+        if (!userRepository.existsById(userId)) {
+            throw new ObjectNotFoundException(String.format(
+                    "User with id %d does not exist", userId), "CheckUserExistsById");
         }
-
-        User user = userRepository.updateUser(userId, userMapper.toUser(userDto));
-        log.info("Updated user data with id {}", user.getId());
-        return userMapper.toUserDto(user);
-    }
-
-    @Override
-    public Long deleteUser(Long userId) throws ObjectNotFoundException {
-        checkUserId(userId);
-        Long userDeletedId = userRepository.deleteUser(userId);
-
-        log.info("Deleted user with id {}", userDeletedId);
-        return userDeletedId;
-    }
-
-    @Override
-    public void checkUserId(Long userId) throws ObjectNotFoundException {
-        userRepository.checkUserId(userId);
     }
 }

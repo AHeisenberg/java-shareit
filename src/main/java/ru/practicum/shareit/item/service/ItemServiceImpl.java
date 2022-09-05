@@ -4,18 +4,22 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.BookingStatus;
+import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exc.ObjectNotFoundException;
 import ru.practicum.shareit.exc.ValidationException;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.mapper.ItemMapper;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
-import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.mapper.UserMapper;
+import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -23,86 +27,139 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
     private final UserService userService;
-    private final UserMapper userMapper;
-
     private final ItemRepository itemRepository;
-    private final ItemMapper itemMapper;
 
+    private final BookingRepository bookingRepository;
+
+    private final CommentRepository commentRepository;
 
     @Override
-    public ItemDto createItem(Long userId, ItemDto itemDto) throws ValidationException {
-        userService.checkUserId(userId);
+    public Item createItem(long userId, Item item) throws ValidationException {
+        User user = userService.findUserById(userId);
 
-        if (!StringUtils.hasText(itemDto.getName())) {
+        if (!StringUtils.hasText(item.getName())) {
             throw new ValidationException("Name field is not filled in", "CreateItem");
         }
 
-        if (itemDto.getDescription() == null) {
+        if (item.getDescription() == null) {
             throw new ValidationException("Description field is not filled in", "CreateItem");
         }
 
-        if (itemDto.getAvailable() == null) {
+        if (item.getAvailable() == null) {
             throw new ValidationException("Available field is not filled in", "CreateItem");
         }
+        item.setOwner(user);
 
-        UserDto userDto = userService.findUserById(userId);
-        Item item = itemRepository.createItem(userId, itemMapper.toItem(itemDto), userMapper.toUser(userDto));
+        Item itemCreated = itemRepository.save(item);
 
-        log.info("The item with the id {} is created", item.getId());
-        return itemMapper.toItemDto(item);
+        log.info("The item with the id {} is created", itemCreated.getId());
+        return itemCreated;
     }
 
     @Override
-    public ItemDto findItemById(Long itemId) throws ObjectNotFoundException {
-        itemRepository.checkItemId(itemId);
-
-        Item item = itemRepository.findItemById(itemId);
-        return itemMapper.toItemDto(item);
-    }
-
-    @Override
-    public Collection<ItemDto> findAllItemsByUserId(Long userId) throws ObjectNotFoundException {
+    public Item findItemById(long userId, long itemId) throws ObjectNotFoundException {
         userService.checkUserId(userId);
 
-        return itemRepository.findAllByUserId(userId).stream()
-                .map(itemMapper::toItemDto)
+        Item item = itemRepository.findById(itemId).orElseThrow(() -> new ObjectNotFoundException(
+                String.format("Item with id %d does not exist", itemId), "getItemById"));
+
+        if (item.getOwner().getId() == userId) {
+            setBookings(item);
+        }
+
+        return item;
+    }
+
+    @Override
+    public Collection<Item> findAllByUserId(long userId) {
+
+        return itemRepository.findAllByOwnerId(userId)
+                .stream()
+                .map(this::setBookings)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public ItemDto updateItem(Long userId, Long itemId, ItemDto itemDto)
-            throws ObjectNotFoundException {
+    public Item updateItem(long userId, long itemId, Item item) throws ObjectNotFoundException {
         userService.checkUserId(userId);
-        itemRepository.checkItemId(itemId);
+        Item itemUpdated = findItemById(userId, itemId);
 
-        if (itemRepository.checkOwner(userId, itemId)) {
+        if (itemUpdated.getOwner().getId() != userId) {
             throw new ObjectNotFoundException("Passed on to the wrong owner of an item", "UpdateItem");
         }
 
-        Item item = itemRepository.updateItem(itemId, itemMapper.toItem(itemDto));
-        log.info("Updated these items with id {}", item.getId());
-        return itemMapper.toItemDto(item);
+        Optional.ofNullable(item.getName()).ifPresent(itemUpdated::setName);
+        Optional.ofNullable(item.getDescription()).ifPresent(itemUpdated::setDescription);
+        Optional.ofNullable(item.getAvailable()).ifPresent(itemUpdated::setAvailable);
+
+        log.info("Updated these items with id {}", itemUpdated.getId());
+        return itemRepository.save(itemUpdated);
     }
 
     @Override
-    public Long deleteItem(Long userId, Long itemId) throws ObjectNotFoundException {
+    public void deleteItem(long userId, long itemId) throws ObjectNotFoundException {
         userService.checkUserId(userId);
-        itemRepository.checkItemId(itemId);
+        checkItemExistsById(itemId);
 
-        Long itemDeletedId = itemRepository.deleteItem(itemId);
-        log.info("Deleted item with id {}", itemDeletedId);
-        return itemDeletedId;
+        itemRepository.deleteById(itemId);
+
+        log.info("Deleted item with id {}", itemId);
     }
 
     @Override
-    public Collection<ItemDto> searchItemByText(String text) {
+    public Collection<Item> searchItemByText(String text) {
         if (!StringUtils.hasText(text)) {
             return Collections.emptyList();
         }
 
-        return itemRepository.searchItemByText(text)
-                .stream()
-                .map(itemMapper::toItemDto)
-                .collect(Collectors.toList());
+        return itemRepository.search(text);
+    }
+
+    @Override
+    public Comment addComment(long userId, long itemId, Comment comment)
+            throws ValidationException {
+        User user = userService.findUserById(userId);
+        Item item = findItemById(userId, itemId);
+
+        bookingRepository.findFirstByBookerIdAndItemIdAndStatusAndStartBefore(userId, itemId, BookingStatus.APPROVED,
+                        LocalDateTime.now())
+                .orElseThrow(() -> new ValidationException(
+                        String.format("The user with id %d did not take the item with id %d on lease", userId, itemId),
+                        "GetBookingById"));
+
+        comment.setAuthor(user);
+        comment.setItem(item);
+        comment.setCreated(LocalDateTime.now());
+
+        log.info("Comment created with id {}", comment.getId());
+        return commentRepository.save(comment);
+    }
+
+    private void checkItemExistsById(long itemId) throws ObjectNotFoundException {
+        if (!itemRepository.existsById(itemId)) {
+            throw new ObjectNotFoundException(
+                    String.format("Item with id %d does not exist", itemId),
+                    "CheckItemExistsById");
+        }
+    }
+
+    private Item setBookings(Item item) {
+        Optional<Booking> last = getLastBookingForItem(item.getId());
+        Optional<Booking> next = getNextBookingForItem(item.getId());
+
+        item.setLastBooking(last.orElse(null));
+        item.setNextBooking(next.orElse(null));
+
+        return item;
+    }
+
+    private Optional<Booking> getLastBookingForItem(long itemId) {
+        return bookingRepository.findFirstByItemIdAndStatusOrderByEnd(itemId,
+                BookingStatus.APPROVED);
+    }
+
+    private Optional<Booking> getNextBookingForItem(long itemId) {
+        return bookingRepository.findFirstByItemIdAndStatusOrderByEndDesc(itemId,
+                BookingStatus.APPROVED);
     }
 }
