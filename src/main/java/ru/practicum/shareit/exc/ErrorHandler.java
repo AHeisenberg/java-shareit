@@ -41,4 +41,10 @@ public class ErrorHandler {
         );
     }
 
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleInvalidParamException(final InvalidParamException e) {
+        return new ErrorResponse(e.getMessage());
+    }
+
 }

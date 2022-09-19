@@ -8,6 +8,7 @@ import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.exc.InvalidParamException;
 import ru.practicum.shareit.exc.ObjectNotFoundException;
 import ru.practicum.shareit.exc.UserHasNoRightsException;
 import ru.practicum.shareit.exc.ValidationException;
@@ -21,6 +22,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class BookingController {
     private static final String HEADER_USER_ID = "X-Sharer-User-Id";
+    private static final String FROM = "0";
+    private static final String SIZE = "20";
     private final BookingService bookingService;
     private final BookingMapper bookingMapper;
 
@@ -48,9 +51,9 @@ public class BookingController {
     @GetMapping
     public Collection<BookingDto> findAllByBookerId(@RequestHeader(HEADER_USER_ID) long userId,
                                                     @RequestParam(defaultValue = "ALL") BookingState state,
-                                                    @RequestParam(defaultValue = "0") int from,
-                                                    @RequestParam(defaultValue = "20") int size)
-            throws ObjectNotFoundException {
+                                                    @RequestParam(defaultValue = FROM) int from,
+                                                    @RequestParam(defaultValue = SIZE) int size)
+            throws ObjectNotFoundException, InvalidParamException {
         return bookingService.findAllByBookerId(userId, state, from, size)
                 .stream()
                 .map(bookingMapper::toBookingDto)
@@ -60,9 +63,9 @@ public class BookingController {
     @GetMapping("/owner")
     public Collection<BookingDto> findAllByOwnerId(@RequestHeader(HEADER_USER_ID) long userId,
                                                    @RequestParam(defaultValue = "ALL") BookingState state,
-                                                   @RequestParam(defaultValue = "0") int from,
-                                                   @RequestParam(defaultValue = "20") int size)
-            throws ObjectNotFoundException {
+                                                   @RequestParam(defaultValue = FROM) int from,
+                                                   @RequestParam(defaultValue = SIZE) int size)
+            throws ObjectNotFoundException, InvalidParamException {
         return bookingService.findAllByOwnerId(userId, state, from, size)
                 .stream()
                 .map(bookingMapper::toBookingDto)

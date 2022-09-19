@@ -9,6 +9,7 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.exc.InvalidParamException;
 import ru.practicum.shareit.exc.ObjectNotFoundException;
 import ru.practicum.shareit.exc.UserHasNoRightsException;
 import ru.practicum.shareit.exc.ValidationException;
@@ -88,10 +89,15 @@ public class BookingServiceImpl implements BookingService, PageTrait {
 
     @Override
     public Collection<Booking> findAllByBookerId(long userId, BookingState state, int from, int size)
-            throws ObjectNotFoundException {
+            throws ObjectNotFoundException, InvalidParamException {
         userService.checkUserId(userId);
-        Pageable page = getPage(from, size, "start", Sort.Direction.DESC);
         Collection<Booking> result = null;
+
+        if (from < 0) {
+            throw new InvalidParamException("Item index must not be less than 0", "findAllByOwnerId");
+        }
+
+        Pageable page = getPage(from, size, "start", Sort.Direction.DESC);
 
         switch (state) {
             case ALL:
@@ -118,9 +124,14 @@ public class BookingServiceImpl implements BookingService, PageTrait {
 
     @Override
     public Collection<Booking> findAllByOwnerId(long userId, BookingState state, int from, int size)
-            throws ObjectNotFoundException {
+            throws ObjectNotFoundException, InvalidParamException {
         userService.checkUserId(userId);
         Collection<Booking> result = null;
+
+        if (from < 0) {
+            throw new InvalidParamException("Item index must not be less than 0", "findAllByOwnerId");
+        }
+
         Pageable page = getPage(from, size, "start", Sort.Direction.DESC);
 
         switch (state) {
