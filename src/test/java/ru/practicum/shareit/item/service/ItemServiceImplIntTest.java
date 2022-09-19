@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
-import ru.practicum.shareit.exc.ObjectNotFoundException;
 import ru.practicum.shareit.exc.ValidationException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
@@ -15,8 +14,6 @@ import java.util.Collection;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.hamcrest.Matchers.empty;
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @RequiredArgsConstructor(onConstructor_ = @Autowired)

@@ -67,7 +67,7 @@ class ItemControllerTest {
 
     @Test
     void testCreateItem() throws Exception {
-        when(itemService.createItem(any(Long.class), any()))                .thenReturn(mockItem);
+        when(itemService.createItem(any(Long.class), any())).thenReturn(mockItem);
         doReturn(mockItemDto).when(itemMapper).toItemDto(any());
 
         mockMvc.perform(post("/items")
