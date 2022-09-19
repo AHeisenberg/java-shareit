@@ -14,6 +14,7 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.exc.InvalidParamException;
 import ru.practicum.shareit.exc.ObjectNotFoundException;
 import ru.practicum.shareit.exc.UserHasNoRightsException;
 import ru.practicum.shareit.exc.ValidationException;
@@ -231,7 +232,7 @@ class BookingServiceImplUnitTest {
     }
 
     @Test
-    void testFindAllByBookerId_StateAll() throws ObjectNotFoundException {
+    void testFindAllByBookerId_StateAll() throws ObjectNotFoundException, InvalidParamException {
         Mockito.when(bookingRepository.findAllByBookerId(anyLong(), Mockito.any(Pageable.class)))
                 .thenReturn(List.of(mockBooking1, mockBooking2, mockBooking3));
 
@@ -245,7 +246,7 @@ class BookingServiceImplUnitTest {
     }
 
     @Test
-    void testFindAllByBookerId_StateCurrent() throws ObjectNotFoundException {
+    void testFindAllByBookerId_StateCurrent() throws ObjectNotFoundException, InvalidParamException {
         Mockito.when(bookingRepository.findForBookerCurrent(anyLong(), Mockito.any(Pageable.class)))
                 .thenReturn(List.of(mockBooking2, mockBooking3));
 
@@ -260,7 +261,7 @@ class BookingServiceImplUnitTest {
     }
 
     @Test
-    void testFindAllByBookerId_StatePast() throws ObjectNotFoundException {
+    void testFindAllByBookerId_StatePast() throws ObjectNotFoundException, InvalidParamException {
         Mockito.when(bookingRepository.findAllByBookerIdAndEndIsBefore(anyLong(),
                         Mockito.any(LocalDateTime.class), Mockito.any(Pageable.class)))
                 .thenReturn(List.of(mockBooking1, mockBooking2));
@@ -276,7 +277,7 @@ class BookingServiceImplUnitTest {
     }
 
     @Test
-    void testFindAllByBookerId_StateFuture() throws ObjectNotFoundException {
+    void testFindAllByBookerId_StateFuture() throws ObjectNotFoundException, InvalidParamException {
         Mockito.when(bookingRepository.findAllByBookerAndFutureState(anyLong(),
                         Mockito.any(Pageable.class)))
                 .thenReturn(List.of(mockBooking1, mockBooking3));
@@ -292,7 +293,7 @@ class BookingServiceImplUnitTest {
     }
 
     @Test
-    void testFindAllByBookerId_StateWaiting() throws ObjectNotFoundException {
+    void testFindAllByBookerId_StateWaiting() throws ObjectNotFoundException, InvalidParamException {
         Mockito.when(bookingRepository.findAllByBookerIdAndStatus(anyLong(),
                         Mockito.any(BookingStatus.class), Mockito.any(Pageable.class)))
                 .thenReturn(List.of(mockBooking3));
@@ -309,7 +310,7 @@ class BookingServiceImplUnitTest {
     }
 
     @Test
-    void testFindAllByBookerId_StateRejected() throws ObjectNotFoundException {
+    void testFindAllByBookerId_StateRejected() throws ObjectNotFoundException, InvalidParamException {
         Mockito.when(bookingRepository.findAllByBookerIdAndStatus(anyLong(),
                         Mockito.any(BookingStatus.class), Mockito.any(Pageable.class)))
                 .thenReturn(List.of(mockBooking2));
@@ -326,7 +327,7 @@ class BookingServiceImplUnitTest {
     }
 
     @Test
-    void testFindAllByOwnerId_StateAll() throws ObjectNotFoundException {
+    void testFindAllByOwnerId_StateAll() throws ObjectNotFoundException, InvalidParamException {
         Mockito.when(bookingRepository.findAllByItemOwnerId(anyLong(), Mockito.any(Pageable.class)))
                 .thenReturn(List.of(mockBooking1, mockBooking2, mockBooking3));
 
@@ -340,7 +341,7 @@ class BookingServiceImplUnitTest {
     }
 
     @Test
-    void testFindAllByOwnerId_StateCurrent() throws ObjectNotFoundException {
+    void testFindAllByOwnerId_StateCurrent() throws ObjectNotFoundException, InvalidParamException {
         Mockito.when(bookingRepository.findAllByItemOwnerIdAndEndIsAfterAndStartIsBefore(anyLong(),
                         Mockito.any(LocalDateTime.class), Mockito.any(LocalDateTime.class), Mockito.any(Pageable.class)))
                 .thenReturn(List.of(mockBooking2, mockBooking3));
@@ -356,7 +357,7 @@ class BookingServiceImplUnitTest {
     }
 
     @Test
-    void testGetAllByOwnerId_StatePast() throws ObjectNotFoundException {
+    void testGetAllByOwnerId_StatePast() throws ObjectNotFoundException, InvalidParamException {
         Mockito.when(bookingRepository.findAllByItemOwnerIdAndEndIsBefore(anyLong(),
                         Mockito.any(LocalDateTime.class), Mockito.any(Pageable.class)))
                 .thenReturn(List.of(mockBooking1, mockBooking2));
@@ -372,7 +373,7 @@ class BookingServiceImplUnitTest {
     }
 
     @Test
-    void testGetAllByOwnerId_StateFuture() throws ObjectNotFoundException {
+    void testGetAllByOwnerId_StateFuture() throws ObjectNotFoundException, InvalidParamException {
         Mockito.when(bookingRepository.findAllByItemOwnerIdAndStartIsAfter(anyLong(),
                         Mockito.any(LocalDateTime.class), Mockito.any(Pageable.class)))
                 .thenReturn(List.of(mockBooking1, mockBooking3));
@@ -388,7 +389,7 @@ class BookingServiceImplUnitTest {
     }
 
     @Test
-    void testGetAllByOwnerId_StateWaiting() throws ObjectNotFoundException {
+    void testGetAllByOwnerId_StateWaiting() throws ObjectNotFoundException, InvalidParamException {
         Mockito.when(bookingRepository.findAllByItemOwnerIdAndStatus(anyLong(),
                         Mockito.any(BookingStatus.class), Mockito.any(Pageable.class)))
                 .thenReturn(List.of(mockBooking3));
@@ -404,7 +405,7 @@ class BookingServiceImplUnitTest {
     }
 
     @Test
-    void testGetAllByOwnerId_StateRejected() throws ObjectNotFoundException {
+    void testGetAllByOwnerId_StateRejected() throws ObjectNotFoundException, InvalidParamException {
         Mockito.when(bookingRepository.findAllByItemOwnerIdAndStatus(anyLong(),
                         Mockito.any(BookingStatus.class), Mockito.any(Pageable.class)))
                 .thenReturn(List.of(mockBooking2));
