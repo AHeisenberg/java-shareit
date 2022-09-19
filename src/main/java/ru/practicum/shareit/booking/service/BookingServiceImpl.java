@@ -2,6 +2,8 @@ package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingState;
@@ -12,6 +14,7 @@ import ru.practicum.shareit.exc.UserHasNoRightsException;
 import ru.practicum.shareit.exc.ValidationException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.trait.PageTrait;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
@@ -21,7 +24,7 @@ import java.util.Collection;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class BookingServiceImpl implements BookingService {
+public class BookingServiceImpl implements BookingService, PageTrait {
     private final UserService userService;
     private final ItemService itemService;
     private final BookingRepository bookingRepository;
@@ -80,67 +83,65 @@ public class BookingServiceImpl implements BookingService {
         if (booking.getBooker().getId() != userId && booking.getItem().getOwner().getId() != userId) {
             throw new UserHasNoRightsException(String.format("User with id %d has no right", userId), "GetBookingById");
         }
-
         return booking;
     }
 
     @Override
-    public Collection<Booking> findAllByBookerId(long userId, BookingState state) throws ObjectNotFoundException {
+    public Collection<Booking> findAllByBookerId(long userId, BookingState state, int from, int size)
+            throws ObjectNotFoundException {
         userService.checkUserId(userId);
-
+        Pageable page = getPage(from, size, "start", Sort.Direction.DESC);
         Collection<Booking> result = null;
 
         switch (state) {
             case ALL:
-                result = bookingRepository.findAllByBookerIdOrderByStartDesc(userId);
+                result = bookingRepository.findAllByBookerId(userId, page);
                 break;
             case CURRENT:
-                result = bookingRepository.findForBookerCurrent(userId);
+                result = bookingRepository.findForBookerCurrent(userId, page);
                 break;
             case PAST:
-                result = bookingRepository.findAllByBookerIdAndEndIsBefore(userId, LocalDateTime.now());
+                result = bookingRepository.findAllByBookerIdAndEndIsBefore(userId, LocalDateTime.now(), page);
                 break;
             case FUTURE:
-                result = bookingRepository.findAllByBookerAndFutureState(userId);
+                result = bookingRepository.findAllByBookerAndFutureState(userId, page);
                 break;
             case WAITING:
-                result = bookingRepository.findAllByBookerIdAndStatus(userId, BookingStatus.WAITING);
+                result = bookingRepository.findAllByBookerIdAndStatus(userId, BookingStatus.WAITING, page);
                 break;
             case REJECTED:
-                result = bookingRepository.findAllByBookerIdAndStatus(userId, BookingStatus.REJECTED);
+                result = bookingRepository.findAllByBookerIdAndStatus(userId, BookingStatus.REJECTED, page);
                 break;
         }
         return result;
     }
 
-
     @Override
-    public Collection<Booking> findAllByOwnerId(long userId, BookingState state) throws ObjectNotFoundException {
+    public Collection<Booking> findAllByOwnerId(long userId, BookingState state, int from, int size)
+            throws ObjectNotFoundException {
         userService.checkUserId(userId);
-
         Collection<Booking> result = null;
+        Pageable page = getPage(from, size, "start", Sort.Direction.DESC);
 
         switch (state) {
             case ALL:
-                result = bookingRepository.findAllByItemOwnerIdOrderByStartDesc(userId);
+                result = bookingRepository.findAllByItemOwnerId(userId, page);
                 break;
-
             case CURRENT:
-                result = bookingRepository.findAllByItemOwnerIdAndEndIsAfterAndStartIsBefore(
-                        userId, LocalDateTime.now(), LocalDateTime.now());
+                result = bookingRepository.findAllByItemOwnerIdAndEndIsAfterAndStartIsBefore(userId, LocalDateTime.now(),
+                        LocalDateTime.now(), page);
                 break;
             case PAST:
-                result = bookingRepository.findAllByItemOwnerIdAndEndIsBefore(userId, LocalDateTime.now());
+                result = bookingRepository.findAllByItemOwnerIdAndEndIsBefore(userId, LocalDateTime.now(), page);
                 break;
             case FUTURE:
-                result = bookingRepository.findAllByItemOwnerIdAndStartIsAfterOrderByStartDesc(
-                        userId, LocalDateTime.now());
+                result = bookingRepository.findAllByItemOwnerIdAndStartIsAfter(userId, LocalDateTime.now(), page);
                 break;
             case WAITING:
-                result = bookingRepository.findAllByItemOwnerIdAndStatus(userId, BookingStatus.WAITING);
+                result = bookingRepository.findAllByItemOwnerIdAndStatus(userId, BookingStatus.WAITING, page);
                 break;
             case REJECTED:
-                result = bookingRepository.findAllByItemOwnerIdAndStatus(userId, BookingStatus.REJECTED);
+                result = bookingRepository.findAllByItemOwnerIdAndStatus(userId, BookingStatus.REJECTED, page);
                 break;
         }
         return result;

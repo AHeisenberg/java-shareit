@@ -23,6 +23,7 @@ public class BookingDto {
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
+    @Builder
     public static class Item {
         private Long id;
         private String name;
@@ -33,6 +34,7 @@ public class BookingDto {
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
+    @Builder
     public static class User {
         private Long id;
         private String name;

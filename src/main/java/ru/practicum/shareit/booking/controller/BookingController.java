@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class BookingController {
     private static final String HEADER_USER_ID = "X-Sharer-User-Id";
-
     private final BookingService bookingService;
     private final BookingMapper bookingMapper;
 
@@ -48,9 +47,11 @@ public class BookingController {
 
     @GetMapping
     public Collection<BookingDto> findAllByBookerId(@RequestHeader(HEADER_USER_ID) long userId,
-                                                    @RequestParam(defaultValue = "ALL") BookingState state)
+                                                    @RequestParam(defaultValue = "ALL") BookingState state,
+                                                    @RequestParam(defaultValue = "0") int from,
+                                                    @RequestParam(defaultValue = "20") int size)
             throws ObjectNotFoundException {
-        return bookingService.findAllByBookerId(userId, state)
+        return bookingService.findAllByBookerId(userId, state, from, size)
                 .stream()
                 .map(bookingMapper::toBookingDto)
                 .collect(Collectors.toList());
@@ -58,9 +59,11 @@ public class BookingController {
 
     @GetMapping("/owner")
     public Collection<BookingDto> findAllByOwnerId(@RequestHeader(HEADER_USER_ID) long userId,
-                                                   @RequestParam(defaultValue = "ALL") BookingState state)
+                                                   @RequestParam(defaultValue = "ALL") BookingState state,
+                                                   @RequestParam(defaultValue = "0") int from,
+                                                   @RequestParam(defaultValue = "20") int size)
             throws ObjectNotFoundException {
-        return bookingService.findAllByOwnerId(userId, state)
+        return bookingService.findAllByOwnerId(userId, state, from, size)
                 .stream()
                 .map(bookingMapper::toBookingDto)
                 .collect(Collectors.toList());

@@ -15,11 +15,10 @@ public interface BookingService {
 
     Booking findBookingById(long userId, long bookingId) throws ObjectNotFoundException, UserHasNoRightsException;
 
-    Collection<Booking> findAllByBookerId(long userId, BookingState state)
+    Collection<Booking> findAllByBookerId(long userId, BookingState state, int from, int size)
             throws ObjectNotFoundException;
 
-    Collection<Booking> findAllByOwnerId(long userId, BookingState state) throws ObjectNotFoundException;
-
-
+    Collection<Booking> findAllByOwnerId(long userId, BookingState state, int from, int size)
+            throws ObjectNotFoundException;
 }
 

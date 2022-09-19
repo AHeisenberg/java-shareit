@@ -5,6 +5,7 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.requests.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.Optional;
@@ -20,12 +21,12 @@ public class ItemMapper {
                 item.getDescription(),
                 item.getAvailable(),
                 toUserItem(item.getOwner()),
+                Optional.ofNullable(item.getRequest()).map(ItemRequest::getId).orElse(null),
                 Optional.ofNullable(item.getLastBooking()).map(this::toBookingItem).orElse(null),
                 Optional.ofNullable(item.getNextBooking()).map(this::toBookingItem).orElse(null),
                 item.getComments().stream().map(this::toCommentItem).collect(Collectors.toList())
         );
     }
-
 
     public Item toItem(ItemDto itemDto) {
         return new Item(
@@ -34,12 +35,15 @@ public class ItemMapper {
                 itemDto.getDescription(),
                 itemDto.getAvailable(),
                 Optional.ofNullable(itemDto.getOwner()).map(this::toUser).orElse(null),
-                null,
+                Optional.ofNullable(itemDto.getRequestId()).map(
+                        (requestId) -> new ItemRequest(requestId, null, null, null, null)
+                ).orElse(null),
                 Optional.ofNullable(itemDto.getLastBooking()).map(this::toBooking).orElse(null),
                 Optional.ofNullable(itemDto.getNextBooking()).map(this::toBooking).orElse(null),
                 itemDto.getComments().stream().map(this::toComment).collect(Collectors.toList())
         );
     }
+
 
     private ItemDto.User toUserItem(User user) {
         return new ItemDto.User(
