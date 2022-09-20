@@ -27,10 +27,7 @@ public class ItemRequestServiceImpl implements ItemRequestService, PageTrait {
     @Override
     public ItemRequest createItemRequest(long userId, ItemRequest itemRequest) throws ValidationException {
         User user = userService.findUserById(userId);
-
-        if (itemRequest.getDescription() == null) {
-            throw new ValidationException("The description field is empty", "CreateItem");
-        }
+        validateItemRequest(itemRequest);
 
         itemRequest.setRequestor(user);
         itemRequest.setCreated(LocalDateTime.now());
@@ -53,13 +50,7 @@ public class ItemRequestServiceImpl implements ItemRequestService, PageTrait {
             throws ObjectNotFoundException, InvalidParamException {
         userService.checkUserId(userId);
 
-        if (from < 0) {
-            throw new InvalidParamException("invalid parameter from", "getAllItemRequest");
-        }
-
-        if (size < 0) {
-            throw new InvalidParamException("invalid parameter size", "getAllItemRequest");
-        }
+        validatePage(from, size);
 
         Pageable page = getPage(from, size, "created", Sort.Direction.ASC);
 
@@ -85,6 +76,22 @@ public class ItemRequestServiceImpl implements ItemRequestService, PageTrait {
                     String.format("No request for an item with id %d", requestId),
                     "CheckUserExistsItemRequestById"
             );
+        }
+    }
+
+    private void validateItemRequest(ItemRequest itemRequest) throws ValidationException {
+        if (itemRequest.getDescription() == null) {
+            throw new ValidationException("The description field is empty", "CreateItem");
+        }
+    }
+
+    private void validatePage(int from, int size) throws InvalidParamException {
+        if (from < 0) {
+            throw new InvalidParamException("invalid parameter from", "getAllItemRequest");
+        }
+
+        if (size < 0) {
+            throw new InvalidParamException("invalid parameter size", "getAllItemRequest");
         }
     }
 }

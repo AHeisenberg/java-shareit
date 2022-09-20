@@ -40,17 +40,7 @@ public class ItemServiceImpl implements ItemService, PageTrait {
     public Item createItem(long userId, Item item) throws ValidationException {
         User user = userService.findUserById(userId);
 
-        if (!StringUtils.hasText(item.getName())) {
-            throw new ValidationException("Name field is not filled in", "CreateItem");
-        }
-
-        if (item.getDescription() == null) {
-            throw new ValidationException("Description field is not filled in", "CreateItem");
-        }
-
-        if (item.getAvailable() == null) {
-            throw new ValidationException("Available field is not filled in", "CreateItem");
-        }
+        validateItem(item);
 
         if (item.getRequest() != null) {
             itemRequestService.checkItemRequestExistsById(item.getRequest().getId());
@@ -170,5 +160,19 @@ public class ItemServiceImpl implements ItemService, PageTrait {
     private Optional<Booking> getNextBookingForItem(long itemId) {
         return bookingRepository.findFirstByItemIdAndStatusOrderByEndDesc(itemId,
                 BookingStatus.APPROVED);
+    }
+
+    private void validateItem(Item item) throws ValidationException {
+        if (!StringUtils.hasText(item.getName())) {
+            throw new ValidationException("Name field is not filled in", "CreateItem");
+        }
+
+        if (item.getDescription() == null) {
+            throw new ValidationException("Description field is not filled in", "CreateItem");
+        }
+
+        if (item.getAvailable() == null) {
+            throw new ValidationException("Available field is not filled in", "CreateItem");
+        }
     }
 }

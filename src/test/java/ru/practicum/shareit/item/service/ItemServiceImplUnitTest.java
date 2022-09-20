@@ -117,23 +117,33 @@ class ItemServiceImplUnitTest {
     }
 
     @Test
-    void testCreateItem_FailValidation() throws ObjectNotFoundException {
+    void testCreateItem_FailValidationItemWithoutAvailable() throws ObjectNotFoundException {
         Mockito.when(userService.findUserById(anyLong())).thenReturn(mockUserFirst);
-
-        Exception exception1 = assertThrows(ValidationException.class, () ->
-                itemService.createItem(mockUserFirst.getId(), mockItemWithoutName));
-
-        assertEquals("Name field is not filled in", exception1.getMessage());
-
-        Exception exception2 = assertThrows(ValidationException.class, () ->
-                itemService.createItem(mockUserFirst.getId(), mockItemWithoutDesc));
-
-        assertEquals("Description field is not filled in", exception2.getMessage());
 
         Exception exception3 = assertThrows(ValidationException.class, () ->
                 itemService.createItem(mockUserFirst.getId(), mockItemWithoutAvailable));
 
         assertEquals("Available field is not filled in", exception3.getMessage());
+    }
+
+    @Test
+    void testCreateItem_FailValidationItemWithoutName() throws ObjectNotFoundException {
+        Mockito.when(userService.findUserById(anyLong())).thenReturn(mockUserFirst);
+
+        Exception exception = assertThrows(ValidationException.class, () ->
+                itemService.createItem(mockUserFirst.getId(), mockItemWithoutName));
+
+        assertEquals("Name field is not filled in", exception.getMessage());
+    }
+
+    @Test
+    void testCreateItem_FailValidationItemWithoutDesc() throws ObjectNotFoundException {
+        Mockito.when(userService.findUserById(anyLong())).thenReturn(mockUserFirst);
+
+        Exception exception2 = assertThrows(ValidationException.class, () ->
+                itemService.createItem(mockUserFirst.getId(), mockItemWithoutDesc));
+
+        assertEquals("Description field is not filled in", exception2.getMessage());
     }
 
     @Test

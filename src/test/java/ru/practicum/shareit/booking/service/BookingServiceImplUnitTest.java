@@ -118,28 +118,43 @@ class BookingServiceImplUnitTest {
     }
 
     @Test
-    void testCreateBooking_FailedValidationBooking() throws ObjectNotFoundException {
+    void testCreateBooking_FailedValidationBookingStartFromLast() throws ObjectNotFoundException {
         Mockito.when(itemService.findItemById(anyLong(), anyLong())).thenReturn(mockItem1);
 
-        Exception exception1 = assertThrows(ValidationException.class, () ->
+        Exception exception = assertThrows(ValidationException.class, () ->
                 bookingService.createBooking(2L, mockBookingStartFromLast));
 
-        assertEquals("The start or end date of the booking is incorrect", exception1.getMessage());
+        assertEquals("The start or end date of the booking is incorrect", exception.getMessage());
+    }
 
-        Exception exception2 = assertThrows(ValidationException.class, () ->
+    @Test
+    void testCreateBooking_FailedValidationBookingEndFromLast() throws ObjectNotFoundException {
+        Mockito.when(itemService.findItemById(anyLong(), anyLong())).thenReturn(mockItem1);
+
+        Exception exception = assertThrows(ValidationException.class, () ->
                 bookingService.createBooking(2L, mockBookingEndFromLast));
 
-        assertEquals("The start or end date of the booking is incorrect", exception2.getMessage());
+        assertEquals("The start or end date of the booking is incorrect", exception.getMessage());
+    }
 
-        Exception exception3 = assertThrows(ValidationException.class, () ->
+    @Test
+    void testCreateBooking_FailedValidationBookingStartAfterEnd() throws ObjectNotFoundException {
+        Mockito.when(itemService.findItemById(anyLong(), anyLong())).thenReturn(mockItem1);
+
+        Exception exception = assertThrows(ValidationException.class, () ->
                 bookingService.createBooking(2L, mockBookingStartAfterEnd));
 
-        assertEquals("The start or end date of the booking is incorrect", exception3.getMessage());
+        assertEquals("The start or end date of the booking is incorrect", exception.getMessage());
+    }
 
-        Exception exception4 = assertThrows(UserHasNoRightsException.class, () ->
+    @Test
+    void testCreateBooking_FailedValidationBookingWrongUser() throws ObjectNotFoundException {
+        Mockito.when(itemService.findItemById(anyLong(), anyLong())).thenReturn(mockItem1);
+
+        Exception exception = assertThrows(UserHasNoRightsException.class, () ->
                 bookingService.createBooking(1L, mockBookingWrongUser));
 
-        assertEquals("The start or end date of the booking is incorrect", exception4.getMessage());
+        assertEquals("The start or end date of the booking is incorrect", exception.getMessage());
     }
 
     @Test

@@ -120,16 +120,19 @@ class ItemRequestServiceImplUnitTest {
     }
 
     @Test
-    void testFindAllItemRequest_FailedValidation() {
-        Exception exception1 = assertThrows(InvalidParamException.class, () ->
+    void testFindAllItemRequest_FailedValidationWithInvalidParameterFrom() {
+        Exception exception = assertThrows(InvalidParamException.class, () ->
                 itemRequestService.findAllItemRequest(firstUser.getId(), -1, 20));
 
-        assertEquals("invalid parameter from", exception1.getMessage());
+        assertEquals("invalid parameter from", exception.getMessage());
+    }
 
-        Exception exception2 = assertThrows(InvalidParamException.class, () ->
+    @Test
+    void testFindAllItemRequest_FailedValidationWithInvalidParameterSize() {
+        Exception exception = assertThrows(InvalidParamException.class, () ->
                 itemRequestService.findAllItemRequest(firstUser.getId(), 0, -1));
 
-        assertEquals("invalid parameter size", exception2.getMessage());
+        assertEquals("invalid parameter size", exception.getMessage());
     }
 
     @Test

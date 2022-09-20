@@ -37,17 +37,7 @@ public class BookingServiceImpl implements BookingService, PageTrait {
 
         Item item = itemService.findItemById(userId, booking.getItem().getId());
 
-        if (!item.getAvailable()) {
-            throw new ValidationException("unavailable item", "CreateBooking");
-        }
-        if (item.getOwner().getId().equals(userId)) {
-            throw new UserHasNoRightsException(ERROR_MESSAGE_DATE, "CreateBooking");
-        }
-        if (booking.getStart().isBefore(LocalDateTime.now()) || booking.getEnd().isBefore(LocalDateTime.now())
-                || booking.getEnd().isBefore(booking.getStart())) {
-            throw new ValidationException(ERROR_MESSAGE_DATE, "CreateBooking");
-        }
-
+        validateBooking(userId, booking, item);
         booking.setBooker(new User(userId, null, null));
         booking.setItem(item);
         booking.setStatus(BookingStatus.WAITING);
@@ -60,15 +50,7 @@ public class BookingServiceImpl implements BookingService, PageTrait {
     public Booking setApproved(long userId, long bookingId, boolean approved) throws ValidationException {
         Booking booking = findBookingById(userId, bookingId);
 
-        if (booking.getStatus() != BookingStatus.WAITING) {
-            throw new ValidationException(String.format(
-                    "Reservation with id %d is not pending confirmation", bookingId), "SetStatus");
-        }
-
-        if (booking.getItem().getOwner().getId() != userId) {
-            throw new UserHasNoRightsException(String.format(
-                    "User with id %d has no right to change status", userId), "SetApproved");
-        }
+        validateApproved(userId, bookingId, booking);
         booking.setStatus(approved ? BookingStatus.APPROVED : BookingStatus.REJECTED);
         return bookingRepository.save(booking);
     }
@@ -93,9 +75,7 @@ public class BookingServiceImpl implements BookingService, PageTrait {
         userService.checkUserId(userId);
         Collection<Booking> result = null;
 
-        if (from < 0) {
-            throw new InvalidParamException("Item index must not be less than 0", "findAllByOwnerId");
-        }
+        validatePage(from);
 
         Pageable page = getPage(from, size, "start", Sort.Direction.DESC);
 
@@ -128,9 +108,7 @@ public class BookingServiceImpl implements BookingService, PageTrait {
         userService.checkUserId(userId);
         Collection<Booking> result = null;
 
-        if (from < 0) {
-            throw new InvalidParamException("Item index must not be less than 0", "findAllByOwnerId");
-        }
+        validatePage(from);
 
         Pageable page = getPage(from, size, "start", Sort.Direction.DESC);
 
@@ -156,5 +134,36 @@ public class BookingServiceImpl implements BookingService, PageTrait {
                 break;
         }
         return result;
+    }
+
+    private void validatePage(int from) throws InvalidParamException {
+        if (from < 0) {
+            throw new InvalidParamException("Item index must not be less than 0", "findAllByOwnerId");
+        }
+    }
+
+    private void validateBooking(long userId, Booking booking, Item item) throws ValidationException {
+        if (!item.getAvailable()) {
+            throw new ValidationException("unavailable item", "CreateBooking");
+        }
+        if (item.getOwner().getId().equals(userId)) {
+            throw new UserHasNoRightsException(ERROR_MESSAGE_DATE, "CreateBooking");
+        }
+        if (booking.getStart().isBefore(LocalDateTime.now()) || booking.getEnd().isBefore(LocalDateTime.now())
+                || booking.getEnd().isBefore(booking.getStart())) {
+            throw new ValidationException(ERROR_MESSAGE_DATE, "CreateBooking");
+        }
+    }
+
+    private void validateApproved(long userId, long bookingId, Booking booking) throws ValidationException {
+        if (booking.getStatus() != BookingStatus.WAITING) {
+            throw new ValidationException(String.format(
+                    "Reservation with id %d is not pending confirmation", bookingId), "SetStatus");
+        }
+
+        if (booking.getItem().getOwner().getId() != userId) {
+            throw new UserHasNoRightsException(String.format(
+                    "User with id %d has no right to change status", userId), "SetApproved");
+        }
     }
 }
