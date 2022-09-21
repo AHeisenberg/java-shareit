@@ -12,13 +12,13 @@ public interface ItemService {
 
     Item findItemById(long userId, long itemId) throws ObjectNotFoundException;
 
-    Collection<Item> findAllByUserId(long userId) throws ObjectNotFoundException;
+    Collection<Item> findAllByUserId(long userId, int from, int size) throws ObjectNotFoundException;
 
     Item updateItem(long userId, long itemId, Item item) throws ObjectNotFoundException;
 
     void deleteItem(long userId, long itemId) throws ObjectNotFoundException;
 
-    Collection<Item> searchItemByText(String text);
+    Collection<Item> searchItemByText(String text, int from, int size);
 
     Comment addComment(long userId, long itemId, Comment comment)
             throws ValidationException;

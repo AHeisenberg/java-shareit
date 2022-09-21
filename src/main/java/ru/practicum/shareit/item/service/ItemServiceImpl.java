@@ -2,6 +2,8 @@ package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import ru.practicum.shareit.booking.model.Booking;
@@ -13,6 +15,8 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.requests.service.ItemRequestService;
+import ru.practicum.shareit.trait.PageTrait;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
@@ -25,28 +29,21 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ItemServiceImpl implements ItemService {
-    private final UserService userService;
-    private final ItemRepository itemRepository;
-
+public class ItemServiceImpl implements ItemService, PageTrait {
     private final BookingRepository bookingRepository;
-
+    private final UserService userService;
+    private final ItemRequestService itemRequestService;
+    private final ItemRepository itemRepository;
     private final CommentRepository commentRepository;
 
     @Override
     public Item createItem(long userId, Item item) throws ValidationException {
         User user = userService.findUserById(userId);
 
-        if (!StringUtils.hasText(item.getName())) {
-            throw new ValidationException("Name field is not filled in", "CreateItem");
-        }
+        validateItem(item);
 
-        if (item.getDescription() == null) {
-            throw new ValidationException("Description field is not filled in", "CreateItem");
-        }
-
-        if (item.getAvailable() == null) {
-            throw new ValidationException("Available field is not filled in", "CreateItem");
+        if (item.getRequest() != null) {
+            itemRequestService.checkItemRequestExistsById(item.getRequest().getId());
         }
         item.setOwner(user);
 
@@ -71,9 +68,11 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Collection<Item> findAllByUserId(long userId) {
+    public Collection<Item> findAllByUserId(long userId, int from, int size) throws ObjectNotFoundException {
+        userService.checkUserId(userId);
+        Pageable page = getPage(from, size, "id", Sort.Direction.ASC);
 
-        return itemRepository.findAllByOwnerId(userId)
+        return itemRepository.findAllByOwnerId(userId, page)
                 .stream()
                 .map(this::setBookings)
                 .collect(Collectors.toList());
@@ -100,19 +99,19 @@ public class ItemServiceImpl implements ItemService {
     public void deleteItem(long userId, long itemId) throws ObjectNotFoundException {
         userService.checkUserId(userId);
         checkItemExistsById(itemId);
-
         itemRepository.deleteById(itemId);
 
         log.info("Deleted item with id {}", itemId);
     }
 
     @Override
-    public Collection<Item> searchItemByText(String text) {
+    public Collection<Item> searchItemByText(String text, int from, int size) {
+        Pageable page = getPage(from, size, "id", Sort.Direction.ASC);
+
         if (!StringUtils.hasText(text)) {
             return Collections.emptyList();
         }
-
-        return itemRepository.search(text);
+        return itemRepository.search(text, page);
     }
 
     @Override
@@ -161,5 +160,19 @@ public class ItemServiceImpl implements ItemService {
     private Optional<Booking> getNextBookingForItem(long itemId) {
         return bookingRepository.findFirstByItemIdAndStatusOrderByEndDesc(itemId,
                 BookingStatus.APPROVED);
+    }
+
+    private void validateItem(Item item) throws ValidationException {
+        if (!StringUtils.hasText(item.getName())) {
+            throw new ValidationException("Name field is not filled in", "CreateItem");
+        }
+
+        if (item.getDescription() == null) {
+            throw new ValidationException("Description field is not filled in", "CreateItem");
+        }
+
+        if (item.getAvailable() == null) {
+            throw new ValidationException("Available field is not filled in", "CreateItem");
+        }
     }
 }

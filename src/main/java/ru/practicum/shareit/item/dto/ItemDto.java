@@ -1,9 +1,6 @@
 package ru.practicum.shareit.item.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
+import lombok.*;
 
 import javax.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
@@ -13,6 +10,7 @@ import java.util.Collection;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class ItemDto {
     private Long id;
     @NotBlank
@@ -23,6 +21,7 @@ public class ItemDto {
     @NonNull
     private Boolean available;
     private User owner;
+    private Long requestId;
     private Booking lastBooking;
     private Booking nextBooking;
     Collection<Comment> comments = new ArrayList<>();
@@ -30,6 +29,7 @@ public class ItemDto {
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
+    @Builder
     public static class User {
         private Long id;
         private String name;
@@ -39,6 +39,7 @@ public class ItemDto {
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
+    @Builder
     public static class Booking {
         private Long id;
         private Long bookerId;
@@ -49,6 +50,7 @@ public class ItemDto {
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
+    @Builder
     public static class Comment {
         Long id;
         String text;
