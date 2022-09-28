@@ -141,6 +141,7 @@ public class ItemServiceImpl implements ItemService, PageTrait {
                     "CheckItemExistsById");
         }
     }
+
     private Item setBookings(Item item) {
         Optional<Booking> last = getLastBookingForItem(item.getId());
         Optional<Booking> next = getNextBookingForItem(item.getId());
