@@ -24,7 +24,7 @@ public class ItemDto {
     private Long requestId;
     private Booking lastBooking;
     private Booking nextBooking;
-    Collection<Comment> comments = new ArrayList<>();
+    private Collection<Comment> comments = new ArrayList<>();
 
     @Data
     @AllArgsConstructor
@@ -42,8 +42,8 @@ public class ItemDto {
     @NoArgsConstructor
     @Builder
     public static class Comment {
-        Long id;
-        String text;
-        String authorName;
+        private Long id;
+        private String text;
+        private String authorName;
     }
 }

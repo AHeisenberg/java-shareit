@@ -16,26 +16,21 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "from Booking b " +
             "where b.booker.id = :bookerId and current_timestamp > b.start" +
             " and current_timestamp < b.end")
-    List<Booking> findForBookerCurrent(long bookerId, Pageable page);//
+    List<Booking> findForBookerCurrent(long bookerId, Pageable page);
 
     @Query("select b " +
             "from Booking b " +
             "where b.booker.id = :id and b.start > current_timestamp " +
             "order by b.start desc")
-    List<Booking> findAllByBookerAndFutureState(long id, Pageable page);//
+    List<Booking> findAllByBookerAndFutureState(long id, Pageable page);
 
-    List<Booking> findAllByBookerId(long userId, Pageable page);//
-
-    List<Booking> findAllByBookerIdAndEndIsAfterAndStartIsBefore(long bookerId, LocalDateTime end, LocalDateTime start,
-                                                                 Pageable page);//delete
+    List<Booking> findAllByBookerId(long userId, Pageable page);
 
     List<Booking> findAllByBookerIdAndEndIsBefore(long bookerId, LocalDateTime end, Pageable page);
 
-    List<Booking> findAllByBookerIdAndStartIsAfter(long bookerId, LocalDateTime start, Pageable page);//delete
+    List<Booking> findAllByBookerIdAndStatus(long bookerId, BookingStatus status, Pageable page);
 
-    List<Booking> findAllByBookerIdAndStatus(long bookerId, BookingStatus status, Pageable page);//
-
-    List<Booking> findAllByItemOwnerId(long userId, Pageable page);//
+    List<Booking> findAllByItemOwnerId(long userId, Pageable page);
 
     List<Booking> findAllByItemOwnerIdAndEndIsBefore(long bookerId, LocalDateTime end, Pageable page);
 

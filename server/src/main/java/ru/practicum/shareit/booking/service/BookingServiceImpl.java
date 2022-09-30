@@ -6,17 +6,17 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.booking.model.BookingStatus;
+import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exc.ObjectNotFoundException;
 import ru.practicum.shareit.exc.UserHasNoRightsException;
 import ru.practicum.shareit.exc.ValidationException;
-import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.trait.PageTrait;
-import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -83,15 +83,12 @@ public class BookingServiceImpl implements BookingService, PageTrait {
                 result = bookingRepository.findAllByBookerId(userId, page);
                 break;
             case CURRENT:
-//                result = bookingRepository.findAllByBookerIdAndEndIsAfterAndStartIsBefore(userId, LocalDateTime.now(),
-//                        LocalDateTime.now(), page);
                 result = bookingRepository.findForBookerCurrent(userId, page);
                 break;
             case PAST:
                 result = bookingRepository.findAllByBookerIdAndEndIsBefore(userId, LocalDateTime.now(), page);
                 break;
             case FUTURE:
-//                result = bookingRepository.findAllByBookerIdAndStartIsAfter(userId, LocalDateTime.now(), page);
                 result = bookingRepository.findAllByBookerAndFutureState(userId, page);
                 break;
 

@@ -7,8 +7,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.model.BookingStatus;
+import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exc.ObjectNotFoundException;
 import ru.practicum.shareit.exc.ValidationException;
 import ru.practicum.shareit.item.model.Comment;
@@ -17,8 +17,8 @@ import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.request.service.ItemRequestService;
 import ru.practicum.shareit.trait.PageTrait;
-import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -114,24 +114,24 @@ public class ItemServiceImpl implements ItemService, PageTrait {
         return itemRepository.search(text, page);
     }
 
-     @Override
+    @Override
     public Comment addComment(long userId, long itemId, Comment comment)
             throws ValidationException {
         User user = userService.findUserById(userId);
         Item item = findItemById(userId, itemId);
 
-         bookingRepository.findFirstByBookerIdAndItemIdAndStatusAndStartBefore(userId, itemId, BookingStatus.APPROVED,
-                         LocalDateTime.now())
-                 .orElseThrow(() -> new ValidationException(
-                         String.format("The user with id %d did not take the item with id %d on lease", userId, itemId),
-                         "GetBookingById"));
+        bookingRepository.findFirstByBookerIdAndItemIdAndStatusAndStartBefore(userId, itemId, BookingStatus.APPROVED,
+                        LocalDateTime.now())
+                .orElseThrow(() -> new ValidationException(
+                        String.format("The user with id %d did not take the item with id %d on lease", userId, itemId),
+                        "GetBookingById"));
 
-         comment.setAuthor(user);
-         comment.setItem(item);
-         comment.setCreated(LocalDateTime.now());
+        comment.setAuthor(user);
+        comment.setItem(item);
+        comment.setCreated(LocalDateTime.now());
 
-         log.info("Comment created with id {}", comment.getId());
-         return commentRepository.save(comment);
+        log.info("Comment created with id {}", comment.getId());
+        return commentRepository.save(comment);
     }
 
     private void checkItemExistsById(long itemId) throws ObjectNotFoundException {

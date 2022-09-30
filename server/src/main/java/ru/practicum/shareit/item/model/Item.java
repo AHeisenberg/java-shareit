@@ -46,5 +46,5 @@ public class Item {
 
     @OneToMany()
     @JoinColumn(name = "item_id")
-    Collection<Comment> comments = new ArrayList<>();
+    private Collection<Comment> comments = new ArrayList<>();
 }

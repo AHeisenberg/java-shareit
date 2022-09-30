@@ -20,13 +20,12 @@ import javax.validation.constraints.PositiveOrZero;
 @RequiredArgsConstructor
 public class BookingController {
     private static final String HEADER_USER_ID = "X-Sharer-User-Id";
-
     private static final String FROM = "0";
     private static final String SIZE = "20";
     private final BookingClient bookingClient;
 
     @PostMapping
-    public ResponseEntity<Object> createBooking(@RequestHeader(HEADER_USER_ID) long userId,//rename from createItem
+    public ResponseEntity<Object> createBooking(@RequestHeader(HEADER_USER_ID) long userId,
                                                 @Valid @RequestBody BookItemRequestDto requestDto) {
         log.info("Creating booking {}, userId={}", requestDto, userId);
         return bookingClient.createBooking(userId, requestDto);
